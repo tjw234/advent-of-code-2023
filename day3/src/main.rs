@@ -71,10 +71,18 @@ impl CharExt for char{
     }
 }
 
-// fn part2_find_possible_gears<'a>(blueprint_lines: &'a Vec<&str>) -> Vec<Vec<regex::Match<'a>>>{
-//     let find_gear = Regex::new(r"\*").unwrap();
-//     blueprint_lines.iter().map(|line| find_gear.find_iter(line).collect()).collect()
-// }
+fn part2_find_possible_gears<'a>(blueprint_lines: &'a Vec<&str>) -> Vec<Vec<regex::Match<'a>>>{
+    let find_gear = Regex::new(r"\*").unwrap();
+    blueprint_lines.iter().map(|line| find_gear.find_iter(line).collect()).collect()
+}
+
+fn is_valid_gear(possible_gear : &regex::Match, line_number: &usize, lines_as_2d_array : &Vec<Vec<char>>) -> bool {
+    let line_range = calc_line_range(line_number, lines_as_2d_array.len());
+    let symbol_search_range = calc_char_range(possible_gear, lines_as_2d_array[0].len());
+    let chars_to_search: Vec<char> = slice_2d_array(&lines_as_2d_array, &line_range, &symbol_search_range);
+    println!("{:?}", chars_to_search);
+    false
+}
 
 #[cfg(test)]
 mod tests {
@@ -181,21 +189,45 @@ mod tests {
         }
         assert_eq!(sum, 413);
     }
-    // #[test]
-    // fn test_find_possible_gears(){
-    //     "467..114..
-    //     ...*......
-    //     ..35..633.
-    //     ......#...
-    //     617*......
-    //     .....+.58.
-    //     ..592.....
-    //     ......755.
-    //     ...$.*....
-    //     .664.598.."};
-    //     let line_array: Vec<&str> = base_string.lines().by_ref().collect();
-    //     let match_vec = part2_find_possible_gears(&line_array);
-    //     println!("{:?}", match_vec[0][1].range());
-    //     assert!(match_vec[0][0].range() == (0..3));
-    // }
+    #[test]
+    fn test_find_possible_gears(){
+        let base_string = indoc!{
+        "467..114..
+        ...*......
+        ..35..633.
+        ......#...
+        617*......
+        .....+.58.
+        ..592.....
+        ......755.
+        ...$.*....
+        .664.598.."};
+        let line_array: Vec<&str> = base_string.lines().by_ref().collect();
+        let match_vec = part2_find_possible_gears(&line_array);
+        println!("{:?}", match_vec[1][0].range());
+        assert!(match_vec[1][0].range() == (3..4));
+        assert!(match_vec[4][0].range() == (3..4));
+        assert!(match_vec[8][0].range() == (5..6));
+    }
+    #[test]
+    fn test_is_valid_gear(){
+        let base_string = indoc!{
+        "467..114..
+        ...*......
+        ..35..633.
+        ......#...
+        617*......
+        .....+.58.
+        ..592.....
+        ......755.
+        ...$.*....
+        .664.598.."};
+        let line_array: Vec<&str> = base_string.lines().by_ref().collect();
+        let match_vec = part2_find_possible_gears(&line_array);
+
+        let lines_as_2d_array: Vec<Vec<char>> = line_array.iter().map(|x| x.chars().collect()).collect();
+        assert!(is_valid_gear(&match_vec[1][0], &1, &lines_as_2d_array));
+        assert!(! is_valid_gear(&match_vec[4][0], &4, &lines_as_2d_array));
+        assert!(is_valid_gear(&match_vec[8][0], &8, &lines_as_2d_array));
+    }
 }
